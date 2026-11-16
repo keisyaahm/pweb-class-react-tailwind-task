@@ -23,8 +23,8 @@ export default function SettingsPage({
 
   const dataSize = new Blob([JSON.stringify(products)]).size;
 
-  function handleResetConfirm() {
-    onResetData();
+  async function handleResetConfirm() {
+    await onResetData();
     setSuccessNotice("Data inventaris produk berhasil direset ke data seeder awal!");
     setTimeout(() => setSuccessNotice(""), 4000);
   }
@@ -49,7 +49,7 @@ export default function SettingsPage({
           Pengaturan Aplikasi
         </h1>
         <p className="text-xs sm:text-sm text-slate-500 mt-1">
-          Sesuaikan preferensi tata letak, kelola persistensi state di browser, dan reset data awal.
+          Sesuaikan preferensi tata letak, periksa koneksi database, dan reset data awal.
         </p>
       </div>
 
@@ -140,7 +140,7 @@ export default function SettingsPage({
               Status Persistensi dan Memori State
             </h2>
             <p className="text-xs text-slate-500">
-              State produk dan preferensi disimpan otomatis ke localStorage browser.
+              Data produk berasal dari Express API dan PostgreSQL. Preferensi tampilan disimpan di browser.
             </p>
           </div>
         </div>
@@ -158,7 +158,7 @@ export default function SettingsPage({
 
           <div className="p-4 rounded-xl bg-slate-50 border border-slate-100">
             <div className="text-xs text-slate-500 font-medium">Penyimpanan Terpasang</div>
-            <div className="text-xl font-bold text-emerald-600 mt-1">localStorage (Aktif)</div>
+            <div className="text-xl font-bold text-emerald-600 mt-1">PostgreSQL (API)</div>
           </div>
         </div>
 
@@ -180,7 +180,7 @@ export default function SettingsPage({
         <div>
           <span className="font-bold">Mekanisme Navigasi dan Siklus Hidup State:</span>
           <br />
-          Navigasi antar route internal dilakukan melalui komponen <code>Link</code> atau <code>NavLink</code> React Router tanpa memuat ulang dokumen HTML (SPA). Data state bersama tetap terjaga di memori komponen root <code>App.jsx</code>, dan dipulihkan kembali dari <code>localStorage</code> saat reload halaman langsung (F5).
+          Navigasi antar route internal dilakukan melalui <code>Link</code> atau <code>NavLink</code> tanpa memuat ulang dokumen HTML. State produk dikelola di <code>App.jsx</code> dan disinkronkan melalui REST API Express ke PostgreSQL. Preferensi grid/list tetap disimpan di <code>localStorage</code>.
         </div>
       </div>
 

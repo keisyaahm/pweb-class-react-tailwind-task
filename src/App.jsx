@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
 import AppLayout from "./layouts/AppLayout";
 import DashboardPage from "./pages/DashboardPage";
@@ -7,29 +7,15 @@ import ProductDetailPage from "./pages/ProductDetailPage";
 import SettingsPage from "./pages/SettingsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import ProductModal from "./components/organisms/ProductModal";
-import {
-  INITIAL_PRODUCTS,
-  STORAGE_KEY_PRODUCTS,
-  STORAGE_KEY_SETTINGS
-} from "./data/initialProducts";
+import { STORAGE_KEY_SETTINGS } from "./data/initialProducts";
+import { productApi } from "./services/productApi";
 
 export default function App() {
   const navigate = useNavigate();
 
-  const [products, setProducts] = useState(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY_PRODUCTS);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
-        }
-      }
-    } catch (e) {
-      console.error(e);
-    }
-    return INITIAL_PRODUCTS;
-  });
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [apiError, setApiError] = useState("");
 
   const [displayMode, setDisplayMode] = useState(() => {
     try {
@@ -43,13 +29,21 @@ export default function App() {
     return "grid";
   });
 
-  useEffect(() => {
+  const loadProducts = useCallback(async () => {
+    setIsLoading(true);
+    setApiError("");
     try {
-      localStorage.setItem(STORAGE_KEY_PRODUCTS, JSON.stringify(products));
-    } catch (e) {
-      console.error(e);
+      setProducts(await productApi.getAll());
+    } catch (error) {
+      setApiError(error.message || "Tidak dapat mengambil data produk dari server.");
+    } finally {
+      setIsLoading(false);
     }
-  }, [products]);
+  }, []);
+
+  useEffect(() => {
+    loadProducts();
+  }, [loadProducts]);
 
   useEffect(() => {
     try {
@@ -61,29 +55,44 @@ export default function App() {
 
   const [isQuickAddOpen, setIsQuickAddOpen] = useState(false);
 
-  function handleSaveProduct(productData) {
-    if (productData.id) {
-      setProducts((prev) =>
-        prev.map((item) => (item.id === productData.id ? { ...item, ...productData } : item))
-      );
-    } else {
-      const maxId = products.length > 0 ? Math.max(...products.map((p) => Number(p.id) || 0)) : 0;
-      const newProduct = {
-        ...productData,
-        id: maxId + 1,
-        createdAt: new Date().toISOString().slice(0, 10)
-      };
-      setProducts((prev) => [newProduct, ...prev]);
+  async function handleSaveProduct(productData) {
+    setApiError("");
+    try {
+      if (productData.id) {
+        const updated = await productApi.update(productData.id, productData);
+        setProducts((prev) => prev.map((item) => (item.id === updated.id ? updated : item)));
+        return updated;
+      }
+
+      const created = await productApi.create(productData);
+      setProducts((prev) => [created, ...prev]);
+      return created;
+    } catch (error) {
+      setApiError(error.message || "Produk gagal disimpan ke Express API.");
+      throw error;
     }
   }
 
-  function handleDeleteProduct(productId) {
-    setProducts((prev) => prev.filter((item) => item.id !== productId));
+  async function handleDeleteProduct(productId) {
+    setApiError("");
+    try {
+      await productApi.remove(productId);
+      setProducts((prev) => prev.filter((item) => item.id !== productId));
+    } catch (error) {
+      setApiError(error.message || "Produk gagal dihapus dari Express API.");
+      throw error;
+    }
   }
 
-  function handleResetData() {
-    setProducts(INITIAL_PRODUCTS);
-    localStorage.setItem(STORAGE_KEY_PRODUCTS, JSON.stringify(INITIAL_PRODUCTS));
+  async function handleResetData() {
+    setApiError("");
+    try {
+      const seededProducts = await productApi.reset();
+      setProducts(seededProducts);
+    } catch (error) {
+      setApiError(error.message || "Data gagal direset melalui Express API.");
+      throw error;
+    }
   }
 
   function handleChangeDisplayMode(mode) {
@@ -93,7 +102,17 @@ export default function App() {
   return (
     <>
       <Routes>
-        <Route path="/" element={<AppLayout totalProducts={products.length} />}>
+        <Route
+          path="/"
+          element={
+            <AppLayout
+              totalProducts={products.length}
+              isLoading={isLoading}
+              apiError={apiError}
+              onRetry={loadProducts}
+            />
+          }
+        >
           <Route
             index
             element={
@@ -122,6 +141,7 @@ export default function App() {
             element={
               <ProductDetailPage
                 products={products}
+                isLoading={isLoading}
                 onSaveProduct={handleSaveProduct}
                 onDeleteProduct={handleDeleteProduct}
               />
@@ -147,8 +167,8 @@ export default function App() {
       <ProductModal
         isOpen={isQuickAddOpen}
         onClose={() => setIsQuickAddOpen(false)}
-        onSave={(data) => {
-          handleSaveProduct(data);
+        onSave={async (data) => {
+          await handleSaveProduct(data);
           navigate("/products");
         }}
       />

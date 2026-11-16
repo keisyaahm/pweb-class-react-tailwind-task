@@ -18,6 +18,8 @@ export default function ProductModal({ isOpen, onClose, onSave, initialData = nu
   });
 
   const [errors, setErrors] = useState({});
+  const [submitError, setSubmitError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (initialData) {
@@ -40,6 +42,7 @@ export default function ProductModal({ isOpen, onClose, onSave, initialData = nu
       });
     }
     setErrors({});
+    setSubmitError("");
   }, [initialData, isOpen]);
 
   useEffect(() => {
@@ -83,21 +86,28 @@ export default function ProductModal({ isOpen, onClose, onSave, initialData = nu
     return Object.keys(newErrors).length === 0;
   }
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
     if (!validate()) return;
 
-    onSave({
-      ...(initialData || {}),
-      name: formData.name.trim(),
-      category: formData.category,
-      price: Number(formData.price),
-      stock: Number(formData.stock),
-      sku: formData.sku.trim() || `PRD-${Date.now().toString().slice(-4)}`,
-      description: formData.description.trim()
-    });
-
-    onClose();
+    setIsSubmitting(true);
+    setSubmitError("");
+    try {
+      await onSave({
+        ...(initialData || {}),
+        name: formData.name.trim(),
+        category: formData.category,
+        price: Number(formData.price),
+        stock: Number(formData.stock),
+        sku: formData.sku.trim() || `PRD-${Date.now().toString().slice(-6)}`,
+        description: formData.description.trim()
+      });
+      onClose();
+    } catch (error) {
+      setSubmitError(error.message || "Produk gagal disimpan ke server.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -207,12 +217,18 @@ export default function ProductModal({ isOpen, onClose, onSave, initialData = nu
             />
           </FormField>
 
+          {submitError && (
+            <p role="alert" className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">
+              {submitError}
+            </p>
+          )}
+
           <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
-            <Button variant="ghost" onClick={onClose}>
+            <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
               Batal
             </Button>
-            <Button type="submit" variant="primary">
-              {isEdit ? "Simpan Perubahan" : "Tambah Produk"}
+            <Button type="submit" variant="primary" disabled={isSubmitting}>
+              {isSubmitting ? "Menyimpan..." : isEdit ? "Simpan Perubahan" : "Tambah Produk"}
             </Button>
           </div>
         </form>
