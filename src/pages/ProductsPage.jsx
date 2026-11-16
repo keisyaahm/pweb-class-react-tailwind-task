@@ -80,9 +80,9 @@ export default function ProductsPage({
     setIsDeleteModalOpen(true);
   }
 
-  function handleConfirmDelete() {
+  async function handleConfirmDelete() {
     if (productToDelete) {
-      onDeleteProduct(productToDelete.id);
+      await onDeleteProduct(productToDelete.id);
       setProductToDelete(null);
     }
   }
