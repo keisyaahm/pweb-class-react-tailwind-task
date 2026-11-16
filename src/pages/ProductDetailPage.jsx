@@ -16,7 +16,7 @@ import {
   CheckCircle2
 } from "lucide-react";
 
-export default function ProductDetailPage({ products = [], onSaveProduct, onDeleteProduct }) {
+export default function ProductDetailPage({ products = [], isLoading = false, onSaveProduct, onDeleteProduct }) {
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -24,6 +24,14 @@ export default function ProductDetailPage({ products = [], onSaveProduct, onDele
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-4xl rounded-2xl border border-slate-200 bg-white p-10 text-center text-sm font-medium text-slate-500 shadow-xs">
+        Memuat detail produk dari Express API...
+      </div>
+    );
+  }
 
   if (!product) {
     return (
@@ -62,13 +70,13 @@ export default function ProductDetailPage({ products = [], onSaveProduct, onDele
   const isLowStock = product.stock > 0 && product.stock <= 5;
   const isOutOfStock = product.stock <= 0;
 
-  function handleSaveEdit(updatedData) {
-    onSaveProduct(updatedData);
+  async function handleSaveEdit(updatedData) {
+    await onSaveProduct(updatedData);
     setIsEditModalOpen(false);
   }
 
-  function handleConfirmDelete() {
-    onDeleteProduct(product.id);
+  async function handleConfirmDelete() {
+    await onDeleteProduct(product.id);
     navigate("/products");
   }
 
@@ -160,7 +168,11 @@ export default function ProductDetailPage({ products = [], onSaveProduct, onDele
               <div className="flex items-center gap-2 text-slate-400 text-xs font-semibold mb-1">
                 <Calendar className="w-4 h-4 text-purple-600" /> Terdaftar Pada
               </div>
-              <div className="font-bold text-slate-800 text-sm">{product.createdAt || "2026-11-16"}</div>
+              <div className="font-bold text-slate-800 text-sm">
+                {product.createdAt
+                  ? new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" }).format(new Date(product.createdAt))
+                  : "Tanggal tidak tersedia"}
+              </div>
             </div>
           </div>
         </div>

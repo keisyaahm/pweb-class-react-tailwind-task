@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Button from "../atoms/Button";
 import { AlertTriangle, X } from "lucide-react";
 
@@ -12,6 +12,9 @@ export default function ConfirmModal({
   onConfirm,
   onClose
 }) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
+
   useEffect(() => {
     function handleKeyDown(e) {
       if (e.key === "Escape" && isOpen) {
@@ -21,6 +24,23 @@ export default function ConfirmModal({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
+
+  useEffect(() => {
+    if (isOpen) setSubmitError("");
+  }, [isOpen]);
+
+  async function handleConfirm() {
+    setIsSubmitting(true);
+    setSubmitError("");
+    try {
+      await onConfirm();
+      onClose();
+    } catch (error) {
+      setSubmitError(error.message || "Tindakan gagal diproses oleh server.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
 
   if (!isOpen) return null;
 
@@ -43,6 +63,11 @@ export default function ConfirmModal({
               <p className="mt-2 text-sm text-slate-500 leading-relaxed">
                 {message}
               </p>
+              {submitError && (
+                <p role="alert" className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">
+                  {submitError}
+                </p>
+              )}
             </div>
             <button
               type="button"
@@ -54,17 +79,15 @@ export default function ConfirmModal({
           </div>
 
           <div className="mt-6 flex items-center justify-end gap-2.5">
-            <Button variant="ghost" onClick={onClose}>
+            <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
               {cancelLabel}
             </Button>
             <Button
               variant={variant === "danger" ? "danger" : "warning"}
-              onClick={() => {
-                onConfirm();
-                onClose();
-              }}
+              onClick={handleConfirm}
+              disabled={isSubmitting}
             >
-              {confirmLabel}
+              {isSubmitting ? "Memproses..." : confirmLabel}
             </Button>
           </div>
         </div>
