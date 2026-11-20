@@ -91,6 +91,7 @@ export default function ProductsPage({
               style={{ minWidth: "auto", padding: "2px 8px" }}
               onClick={() => onChangeDisplayMode("grid")}
               title="Tampilan Grid"
+              aria-label="Grid Mode"
             >
               Grid
             </button>
@@ -100,6 +101,7 @@ export default function ProductsPage({
               style={{ minWidth: "auto", padding: "2px 8px" }}
               onClick={() => onChangeDisplayMode("list")}
               title="Tampilan Tabel"
+              aria-label="List Mode"
             >
               Tabel
             </button>
@@ -113,7 +115,7 @@ export default function ProductsPage({
           <input
             type="text"
             className="xp-input"
-            placeholder="Cari nama, SKU, atau deskripsi..."
+            placeholder="Cari berdasarkan nama, SKU, atau deskripsi..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             style={{ flex: "2" }}
