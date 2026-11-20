@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Button from "../atoms/Button";
-import { AlertTriangle, X } from "lucide-react";
 
 export default function ConfirmModal({
   isOpen,
@@ -45,50 +43,33 @@ export default function ConfirmModal({
   if (!isOpen) return null;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-in fade-in duration-200"
-    >
-      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
-        <div className="p-6">
-          <div className="flex items-start gap-4">
-            <div className={`p-3 rounded-xl shrink-0 ${variant === 'danger' ? 'bg-rose-100 text-rose-600' : 'bg-amber-100 text-amber-600'}`}>
-              <AlertTriangle className="w-6 h-6" />
-            </div>
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-slate-900 leading-tight">
-                {title}
-              </h3>
-              <p className="mt-2 text-sm text-slate-500 leading-relaxed">
-                {message}
-              </p>
-              {submitError && (
-                <p role="alert" className="mt-3 rounded-lg bg-rose-50 px-3 py-2 text-xs font-medium text-rose-700">
-                  {submitError}
-                </p>
-              )}
-            </div>
+    <div className="xp-modal-overlay" role="dialog" aria-modal="true">
+      <div className="xp-modal-window" style={{ maxWidth: "400px" }}>
+        <div className="xp-modal-titlebar">
+          <span className="xp-modal-title">{title}</span>
+          <button type="button" className="xp-titlebar-btn close" onClick={onClose} aria-label="Tutup">
+            &#10005;
+          </button>
+        </div>
+        <div className="xp-modal-body">
+          <p style={{ marginBottom: "12px", lineHeight: "1.5" }}>{message}</p>
+          {submitError && (
+            <p role="alert" style={{ color: "#cc0000", fontSize: "11px", marginBottom: "10px", border: "1px solid #cc0000", padding: "4px 8px", background: "#fff0f0" }}>
+              {submitError}
+            </p>
+          )}
+          <div className="xp-modal-actions">
+            <button type="button" className="xp-button" onClick={onClose} disabled={isSubmitting}>
+              {cancelLabel}
+            </button>
             <button
               type="button"
-              onClick={onClose}
-              className="p-1 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          <div className="mt-6 flex items-center justify-end gap-2.5">
-            <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
-              {cancelLabel}
-            </Button>
-            <Button
-              variant={variant === "danger" ? "danger" : "warning"}
+              className={`xp-button ${variant === "danger" ? "danger" : "warning"}`}
               onClick={handleConfirm}
               disabled={isSubmitting}
             >
               {isSubmitting ? "Memproses..." : confirmLabel}
-            </Button>
+            </button>
           </div>
         </div>
       </div>
