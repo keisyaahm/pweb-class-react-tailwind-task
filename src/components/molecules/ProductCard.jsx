@@ -44,10 +44,22 @@ export default function ProductCard({ product, onEdit, onDelete }) {
           Detail
         </Link>
         <div style={{ display: "flex", gap: "4px" }}>
-          <button type="button" onClick={() => onEdit(product)} className="xp-button edit-btn" style={{ minWidth: "auto", padding: "2px 8px" }}>
+          <button
+            type="button"
+            onClick={() => onEdit(product)}
+            title="Edit Produk"
+            className="xp-button edit-btn"
+            style={{ minWidth: "auto", padding: "2px 8px" }}
+          >
             Edit
           </button>
-          <button type="button" onClick={() => onDelete(product)} className="xp-button danger" style={{ minWidth: "auto", padding: "2px 8px" }}>
+          <button
+            type="button"
+            onClick={() => onDelete(product)}
+            title="Hapus Produk"
+            className="xp-button danger"
+            style={{ minWidth: "auto", padding: "2px 8px" }}
+          >
             Hapus
           </button>
         </div>

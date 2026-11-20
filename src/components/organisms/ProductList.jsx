@@ -62,10 +62,22 @@ export default function ProductList({ products = [], onEdit, onDelete }) {
                       <Link to={`/products/${product.id}`} className="xp-button edit-btn" style={{ minWidth: "auto", padding: "1px 7px" }}>
                         Detail
                       </Link>
-                      <button type="button" onClick={() => onEdit(product)} className="xp-button edit-btn" style={{ minWidth: "auto", padding: "1px 7px" }}>
+                      <button
+                        type="button"
+                        onClick={() => onEdit(product)}
+                        title="Edit Produk"
+                        className="xp-button edit-btn"
+                        style={{ minWidth: "auto", padding: "1px 7px" }}
+                      >
                         Edit
                       </button>
-                      <button type="button" onClick={() => onDelete(product)} className="xp-button danger" style={{ minWidth: "auto", padding: "1px 7px" }}>
+                      <button
+                        type="button"
+                        onClick={() => onDelete(product)}
+                        title="Hapus Produk"
+                        className="xp-button danger"
+                        style={{ minWidth: "auto", padding: "1px 7px" }}
+                      >
                         Hapus
                       </button>
                     </div>
