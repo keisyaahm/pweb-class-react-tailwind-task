@@ -170,7 +170,7 @@ async function run() {
     await page.screenshot({ path: path.join(evidenceDir, "11-fallback-404.png") });
 
     await page.goto(`${BASE_URL}/settings`, { waitUntil: "networkidle0" });
-    await page.waitForFunction(() => document.body.innerText.includes("PostgreSQL (API)"));
+    await page.waitForFunction(() => document.body.innerText.includes("PostgreSQL"));
     await page.screenshot({ path: path.join(evidenceDir, "12-settings-page.png") });
 
     await page.setViewport({ width: 375, height: 667, isMobile: true });
